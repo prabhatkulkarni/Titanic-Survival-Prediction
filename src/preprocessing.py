@@ -37,4 +37,12 @@ print(df["Family_Size"].value_counts())
 
 # Missing_value handelling
 from ml_utils import Missing_Summary
-print(Missing_Summary(df))
+print(Missing_Summary(df)[0])
+def checking_missing():
+    Age = df["Age"].copy()
+    #For median 
+    median_age = Age.median()
+    Age = Age.fillna(round(median_age,0))
+    print(Age)
+    print(df.shape[0])
+checking_missing()
