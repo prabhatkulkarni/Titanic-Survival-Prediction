@@ -4,78 +4,50 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 df = pd.read_csv("data/raw/train.csv")
 # Transform
-#Plan 1 to change Name into the Title
+#col here is which column tile extraction is done
+def extract_title(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    df = df.copy()
 
-Name = df["Name"]
-print(Name)
-df["Title"] = df["Name"].str.extract(r",\s*([^.]*)\.")
-print(df["Title"].unique())
-df["Title"] = df["Title"].replace({
-    "Mlle": "Miss",
-    "Ms": "Miss",
-    "Mme": "Mrs"
-})
-print(df["Title"].unique())
-rare_titles = [
-    "Lady",
-    "the Countess",
-    "Capt",
-    "Col",
-    "Don",
-    "Dr",
-    "Major",
-    "Rev",
-    "Sir",
-    "Jonkheer"
-]
+    df["Title"] = df[col].str.extract(
+        r",\s*([^.]*)\.",
+        expand=False
+    )
 
-df["Title"] = df["Title"].replace(rare_titles, "Rare")
-print(df["Title"].value_counts())
-print(df.columns.to_list())
+    df["Title"] = df["Title"].replace({
+        "Mlle": "Miss",
+        "Ms": "Miss",
+        "Mme": "Mrs"
+    })
+
+    rare_titles = [
+        "Lady", "the Countess", "Capt", "Col",
+        "Don", "Dr", "Major", "Rev",
+        "Sir", "Jonkheer"
+    ]
+
+    df["Title"] = df["Title"].replace(rare_titles, "Rare")
+
+    df.drop(columns=[col], inplace=True)
+
+    return df
 # making anothere column Family size
-df["Family_Size"] = df["SibSp"]+df["Parch"]+1
-print(df["Family_Size"].value_counts())
-
-# Missing_value handelling
-from ml_utils import Missing_Summary
-print(Missing_Summary(df))
-def checking_missing():
-    Age = df["Age"].copy()
-    #For median 
-    median_age = Age.median()
-    Median_Age = Age.fillna(round(median_age,0))
-    #Mean
-    mean_age = Age.mean()
-    Mean_Age = Age.fillna(round(mean_age))
-    #Zero
-    print(f"Skew for mean is added  :{Mean_Age.skew():.2f}")
-    print(f"Skew for median is added  :{Median_Age.skew():.2f}")
-    print(f"Actual Skew : {Age.skew():.2f}")
-    #histoogram for each
-    datasets = [
-    ("Original Age", Age),
-    ("Mean Filled", Mean_Age),
-    ("Median Filled", Median_Age)
-        ]
-
-    for title, data in datasets:
-
-
-        plt.figure(figsize=(8,4))
-        sns.histplot(data, kde=True)
-        plt.title(title)
-        plt.xlabel("Age")
-        plt.savefig(f"{title}_histogram.png")
-        plt.close()
-
-        plt.figure(figsize=(8,2))
-        sns.boxplot(x=data)
-        plt.title(title)
-        plt.savefig(f"{title}_boxplot.png")
-        plt.close()
-    print(Age.describe())
-
-    print(Mean_Age.describe())
-
-    print(Median_Age.describe())    
-checking_missing()
+def create_family_size(df : pd.DataFrame ) -> pd.DataFrame:
+    df = df.copy()
+    df["Family_Size"] = df["SibSp"]+df["Parch"]+1
+    df.drop(columns=["SibSp","Parch"],inplace=True)
+    return df
+def impute_age(df :pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df["Age"] = df["Age"].fillna(df["Age"].mean())
+    return df
+def drop_columns(df: pd.DataFrame, col:list[ str]) -> pd.DataFrame:
+    df = df.copy()
+    df = df.drop(columns=col)
+    return df
+def preprocess(df : pd.DataFrame)->pd.DataFrame :
+    df = extract_title(df,'Name')
+    df = create_family_size(df)
+    df = drop_columns(df, ["PassengerId", "Embarked"])
+    return df
+mdf = preprocess(df)
+print(mdf.columns.to_list())
