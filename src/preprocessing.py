@@ -47,7 +47,6 @@ def drop_columns(df: pd.DataFrame, col:list[ str]) -> pd.DataFrame:
 def preprocess(df : pd.DataFrame)->pd.DataFrame :
     df = extract_title(df,'Name')
     df = create_family_size(df)
-    df = drop_columns(df, ["PassengerId", "Embarked"])
+    df = drop_columns(df, ["PassengerId", "Ticket","Cabin"])#partial drop of Tickets , Cabin
     return df
 mdf = preprocess(df)
-print(mdf.columns.to_list())
