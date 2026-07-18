@@ -13,7 +13,7 @@ from xgboost import XGBClassifier
 from sklearn.svm import SVC
 import pandas as pd
 import numpy as np
-def train():
+def train()->pd.DataFrame:
     Path  = "data/raw/train.csv"
 
     df = pd.read_csv(Path)
@@ -72,7 +72,4 @@ def train():
 
 
     results_df = pd.DataFrame(results)
-    results_df = results_df.drop(columns=["confusion","classification"])
-
-    return results_df
-print(train())
+    return results_df,y_test,y_pred
