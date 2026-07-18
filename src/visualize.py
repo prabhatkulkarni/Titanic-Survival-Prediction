@@ -15,8 +15,7 @@ def plot_metrics_bar():
         sns.barplot(data=result_df, x="model", y=col)
         plt.xticks(rotation=20)
         plt.tight_layout()
-        plt.savefig(f"reports/figures/{col}.png")
-        plt.close()
+        plt.show()
 def plot_confusion_matrix() :
     print("Confusion Matrix")
     for _, row in result_df.iterrows():
@@ -38,8 +37,7 @@ def plot_confusion_matrix() :
         plt.ylabel("Actual Survived")
         plt.title(model)
 
-        plt.savefig(f"reports/figures/{model}.png")
-        plt.close()
+        plt.show()
 def roc_curve_visual(y_test ,y_prob):
     fpr, tpr, thresholds = roc_curve(y_test, y_prob)
 
@@ -56,6 +54,8 @@ def roc_curve_visual(y_test ,y_prob):
 
     plt.legend()
 
-    plt.savefig("reports/figures/roc_curve.png")
-    plt.close()
-roc_curve_visual(y_test,y_prob)
+    plt.show()
+def complete_visualize():
+    plot_metrics_bar()
+    plot_confusion_matrix()
+    roc_curve_visual(y_test,y_prob)
