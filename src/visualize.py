@@ -1,4 +1,4 @@
-from train import train
+from .train import train
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns

@@ -1,6 +1,6 @@
-from encoding import non_scaler_transformer,scaler_transformer
-from preprocessing import preprocess
-from evaluate import evaluate
+from .encoding import non_scaler_transformer,scaler_transformer
+from .preprocessing import preprocess
+from .evaluate import evaluate
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
@@ -13,6 +13,7 @@ from xgboost import XGBClassifier
 from sklearn.svm import SVC
 import pandas as pd
 import numpy as np
+import joblib
 def train()->pd.DataFrame:
     Path  = "data/raw/train.csv"
 
@@ -38,13 +39,17 @@ def train()->pd.DataFrame:
         "KNN Classification":KNeighborsClassifier(),
         "SVM Classification":SVC()
     }
+    best_score = 0
+    best_pipeline = None
+    best_name = None
+
     results = []
     for name,model in Non_scaler_models.items():
         models = Pipeline(
             steps=
         [
            ( "preprocess",non_scaler_transformer()),
-            ("name" , model)
+            ("model", model)
         ]
     
         )
@@ -54,13 +59,17 @@ def train()->pd.DataFrame:
         report = evaluate(y_test, y_pred)
         report["model"] = name 
         results.append(report)
+        if report["accuracy"] > best_score:
+            best_score = report["accuracy"]
+            best_pipeline = models
+            best_name = name
 
     for name , model in Scaler_models.items():
         models = Pipeline(
             steps=
             [
             ("preprocess",scaler_transformer()),
-            ("name" , model )
+            ("model", model)
             ]
         )
         models.fit(X_train,y_train)
@@ -69,7 +78,11 @@ def train()->pd.DataFrame:
         report = evaluate(y_test, y_pred)
         report["model"] = name 
         results.append(report)
-
-
+        if report["accuracy"] > best_score:
+            best_score = report["accuracy"]
+            best_pipeline = models
+            best_name = name
+    joblib.dump(best_pipeline, "models/model.joblib")
+    print(f"Saved best model: {best_name}")
     results_df = pd.DataFrame(results)
     return results_df,y_test,y_pred
